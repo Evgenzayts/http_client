@@ -17,8 +17,7 @@ using json = nlohmann::json;
 // Performs an HTTP GET and prints the response
 int main(int argc, char** argv)
 {
-  try
-  {
+  try {
     // Check command line arguments.
     if (argc != 4) {
       std::cerr <<
@@ -30,6 +29,7 @@ int main(int argc, char** argv)
     auto const host = argv[1];
     auto const port = argv[2];
     auto const target = argv[3];
+    auto const version = 11;
 
     // The io_context is required for all I/O
     net::io_context ioc;
@@ -46,7 +46,7 @@ int main(int argc, char** argv)
 
     // Set up an HTTP GET request message
     http::request<http::string_body>
-        req{http::verb::post, target, 11};
+        req{http::verb::post, target, version};
     req.set(http::field::host, host);
     req.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
     req.target("/v1/api/suggest");
@@ -83,16 +83,9 @@ int main(int argc, char** argv)
     beast::error_code ec;
     stream.socket().shutdown(tcp::socket::shutdown_both, ec);
 
-    // not_connected happens sometimes
-    // so don't bother reporting it.
-    //
-    if(ec && ec != beast::errc::not_connected)
+    if (ec && ec != beast::errc::not_connected)
       throw beast::system_error{ec};
-
-    // If we get here then the connection is closed gracefully
-  }
-  catch(std::exception const& e)
-  {
+  } catch (std::exception const& e) {
     std::cerr << "Error: " << e.what() << std::endl;
     return EXIT_FAILURE;
   }
